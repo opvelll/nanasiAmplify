@@ -1,0 +1,19 @@
+type Thread @model {
+  id: ID!
+  title: String!
+  tags: [String]
+  Comments: [Comment] @connection(keyName: "byThreadId", fields: ["id"])
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type Comment
+  @model
+  @key(name: "byThreadId", fields: ["threadId", "createdAt"]) {
+  id: ID!
+  threadId: ID!
+  content: String!
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+  good: Int
+}
