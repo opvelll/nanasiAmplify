@@ -2,18 +2,16 @@
   <div id="app">
     <!-- ナビゲーション -->
     <b-nav id="nav">
-      <b-nav-item active
-        ><router-link to="/">&lt; 戻る</router-link></b-nav-item
-      >
+      <b-nav-item active>
+        <router-link to="/">&lt; 戻る</router-link>
+      </b-nav-item>
     </b-nav>
 
     <!-- エラーメッセージを表示するモーダル -->
     <b-modal id="error_modal">{{ errorMessage }}</b-modal>
 
     <!-- スレッドが見つからない場合 -->
-    <div class="container" v-if="isNotFound">
-      このスレッドは存在しません。また新しく作ろう。
-    </div>
+    <div class="container" v-if="isNotFound">このスレッドは存在しません。また新しく作ろう。</div>
 
     <!-- スレッド -->
     <div class="container" v-if="!isNotFound">
@@ -26,16 +24,11 @@
           class="border rounded py-2 pl-4 mb-1"
           v-for="comment in commentList"
           v-bind:key="comment.id"
-        >
-          {{ comment.content }}
-        </div>
+        >{{ comment.content }}</div>
       </div>
 
       <!-- コメント追加フォーム -->
-      <amplify-connect
-        :mutation="createCommentMutation"
-        @done="onCreateCommentFinished"
-      >
+      <amplify-connect :mutation="createCommentMutation" @done="onCreateCommentFinished">
         <template slot-scope="{ loading, mutate }">
           <div class>
             <b-card class="mb-2" title="新しくコメントする">
@@ -56,8 +49,7 @@
                     class="mr-1"
                     :disabled="loading"
                     @click="mutate"
-                    >コメントする</b-button
-                  >
+                  >コメントする</b-button>
                 </div>
               </b-form>
             </b-card>
@@ -85,7 +77,7 @@ export default {
       commentList: [],
       nextToken: "",
 
-      createForm: { content: "" },
+      createForm: { content: "" }
     };
   },
   methods: {
@@ -95,7 +87,7 @@ export default {
 
     // api 叩いたあとの処理
     tableListUpdateProcess(isInit) {
-      return (result) => {
+      return result => {
         // console.log(result);
         let threadData = result.data.getThread;
 
@@ -128,12 +120,12 @@ export default {
       // console.log(value, f);
       this.$Amplify.API.graphql({
         query: getThread,
-        variables: value,
+        variables: value
       })
-        .then((a) => {
+        .then(a => {
           f(a);
         })
-        .catch((e) => {
+        .catch(e => {
           console.log(e);
           this.errorMessage = e.errors[0].message;
           // エラーはモーダルで出す。
@@ -145,7 +137,7 @@ export default {
     searchAllComment() {
       var value = {
         id: this.threadId,
-        limit: 1000, //1000が最大値
+        limit: 1000 //1000が最大値
       };
       this.getThreadQuery(value, this.tableListUpdateProcess(false));
     },
@@ -153,20 +145,20 @@ export default {
     searchCommentNextToken() {
       var value = {
         id: this.threadId,
-        nextToken: this.nextToken,
+        nextToken: this.nextToken
       };
       this.getThreadQuery(value, this.tableListUpdateProcess(false));
-    },
+    }
   },
   computed: {
     // コメント作成フォームをクリック時のクエリ
     createCommentMutation() {
       const value = {
-        input: Object.assign({ threadId: this.threadId }, this.createForm),
+        input: Object.assign({ threadId: this.threadId }, this.createForm)
       };
       // console.log(value);
       return this.$Amplify.graphqlOperation(createComment, value);
-    },
+    }
   },
   mounted() {
     this.threadId = this.$route.params.threadName;
@@ -175,11 +167,17 @@ export default {
 
     // subscribe
     this.$Amplify.API.graphql({ query: onCreateComment }).subscribe({
-      next: (diff) => {
-        // console.log(diff);
-        this.commentList.push(diff.value.data.onCreateComment);
-      },
+      next: diff => {
+        console.log(diff);
+        if (
+          !this.commentList.some(
+            come => come.id === diff.value.data.onCreateComment.id
+          )
+        ) {
+          this.commentList.push(diff.value.data.onCreateComment);
+        }
+      }
     });
-  },
+  }
 };
 </script>
