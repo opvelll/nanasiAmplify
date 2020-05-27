@@ -170,6 +170,7 @@ export default {
       next: diff => {
         console.log(diff);
         if (
+          diff.value.data.onCreateComment.threadId === this.threadId &&
           !this.commentList.some(
             come => come.id === diff.value.data.onCreateComment.id
           )
